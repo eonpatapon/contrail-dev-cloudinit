@@ -43,7 +43,7 @@ write_files:
         tmux new-window -t opencontrail:1 -n contrail
         tmux new-window -t opencontrail:2 -n stack
 
-        tmux send-keys -t opencontrail:1 'cd ~/ && git clone https://github.com/eonpatapon/contrail-installer.git && cd ~/contrail-installer/ && cp /opt/opencontrail_localrc localrc && ./contrail.sh build && ./contrail.sh install && ./contrail.sh configure && sudo pip install "greenlet>=0.4.7" && ./contrail.sh start && tmux send-keys -t opencontrail:2 "cd ~/ && git clone https://github.com/openstack-dev/devstack.git -b stable/juno && cd ~/devstack && cp /opt/openstack_local.conf local.conf && cp ~/contrail-installer/devstack/lib/neutron_plugins/opencontrail lib/neutron_plugins/opencontrail && ./stack.sh" C-m' C-m
+        tmux send-keys -t opencontrail:1 'cd ~/ && git clone https://github.com/Juniper/contrail-installer.git && cd ~/contrail-installer/ && cp /opt/opencontrail_localrc localrc && ./contrail.sh build && ./contrail.sh install && ./contrail.sh configure && sudo pip install "greenlet>=0.4.7" && ./contrail.sh start && tmux send-keys -t opencontrail:2 "cd ~/ && git clone https://github.com/openstack-dev/devstack.git -b stable/juno && cd ~/devstack && cp /opt/openstack_local.conf local.conf && cp ~/contrail-installer/devstack/lib/neutron_plugins/opencontrail lib/neutron_plugins/opencontrail && ./stack.sh" C-m' C-m
 
         tmux select-window -t opencontrail:0
     path: /opt/opencontrail_run.sh
