@@ -1,0 +1,3 @@
+FLAVOR=n1.cw.highmem-4
+IMAGE="Ubuntu 14.04"
+KEY_NAME=

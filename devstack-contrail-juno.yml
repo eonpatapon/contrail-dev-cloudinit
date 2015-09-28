@@ -1,0 +1,161 @@
+#cloud-config
+# vim: syntax=yaml
+
+user: cloud
+ssh_pwauth: True
+chpasswd:
+    list: |
+        root:contrail123
+        cloud:contrail123
+    expire: False
+
+package_update: true
+package_upgrade: true
+package_reboot_if_required: true
+
+packages:
+  - git
+  - subversion
+  - mc
+  - vim
+  - traceroute
+  - htop
+  - mosh
+  - tmux
+  - screen
+  - libpq-dev  # rally
+
+final_message: "!!! Starting building OpenContrail !!! (cloudinit runs in $UPTIME seconds)"
+
+output: {all: '| tee -a /var/log/cloud-init-output.log'}
+
+runcmd:
+  - [ sh, -xc, "su cloud -c 'cd && git clone https://github.com/nojhan/liquidprompt.git'" ]
+  - [ sh, -xc, "su cloud -c 'echo source ~/liquidprompt/liquidprompt >> /home/cloud/.bashrc'" ]
+  - [ sh, -xc, "su cloud -c 'git config --global http.sslVerify false'"]
+  - [ sh, -xc, "su cloud -c 'bash /opt/opencontrail_run.sh'" ]
+
+write_files:
+-   content: |
+        #!/usr/bin/env bash
+        tmux new-session -s opencontrail -n shell -d
+
+        tmux new-window -t opencontrail:1 -n contrail
+        tmux new-window -t opencontrail:2 -n stack
+
+        tmux send-keys -t opencontrail:1 'cd ~/ && git clone https://github.com/eonpatapon/contrail-installer.git && cd ~/contrail-installer/ && cp /opt/opencontrail_localrc localrc && ./contrail.sh build && ./contrail.sh install && ./contrail.sh configure && sudo pip install "greenlet>=0.4.7" && ./contrail.sh start && tmux send-keys -t opencontrail:2 "cd ~/ && git clone https://github.com/openstack-dev/devstack.git -b stable/juno && cd ~/devstack && cp /opt/openstack_local.conf local.conf && cp ~/contrail-installer/devstack/lib/neutron_plugins/opencontrail lib/neutron_plugins/opencontrail && ./stack.sh" C-m' C-m
+
+        tmux select-window -t opencontrail:0
+    path: /opt/opencontrail_run.sh
+    permissions: 0775
+-   content: |
+        STACK_DIR=$(cd $(dirname $0) && pwd)
+
+        LOG_DIR=$STACK_DIR/log/screens
+        LOG=True
+        DEBUG=True
+        LOGFILE=$STACK_DIR/log/contrail.log
+        LOGDAYS=1
+        USE_SCREEN=True
+
+        DATABASE_PASSWORD=contrail123
+        RABBIT_PASSWORD=contrail123
+        SERVICE_TOKEN=contrail123
+        SERVICE_PASSWORD=contrail123
+        ADMIN_PASSWORD=contrail123
+
+        SERVICE_TIMEOUT=90
+        SERVICE_HOST=localhost
+        INSTALL_PROFILE=ALL
+        PHYSICAL_INTERFACE=eth1
+
+        # to get source code make it as False
+        CONTRAIL_DEFAULT_INSTALL=False
+
+        # repo proto is https or (default) ssh. Leave commented for ssh
+        CONTRAIL_REPO_PROTO=https
+
+        # proto for openstack bits. Use HTTPS if git is firewalled
+        GIT_BASE=https://github.com
+
+        CONTRAIL_VGW_PUBLIC_NETWORK=default-domain:admin:public:public
+        CONTRAIL_VGW_PUBLIC_SUBNET=172.16.1.0/24
+        CONTRAIL_VGW_INTERFACE=vgw
+
+        #CONTRAIL_BRANCH=R1.10
+        NB_JOBS=$(lscpu -p | grep -cve '^#')
+
+    path: /opt/opencontrail_localrc
+    permissions: 0664
+-   content: |
+        [[local|localrc]]
+        STACK_DIR=$(cd $(dirname $0) && pwd)
+
+        LOG_DIR=$STACK_DIR/log/screens
+        LOG=True
+        DEBUG=True
+        LOGFILE=$STACK_DIR/log/stack.log
+        LOGDAYS=1
+        SCREEN_LOGDIR=$LOG_DIR
+
+        disable_service n-net
+        disable_service n-obj
+        enable_service tempest
+        disable_service cinder
+        disable_service c-api
+        disable_service c-vol
+        disable_service c-sch
+        enable_service q-svc
+        enable_service q-meta
+        enable_service neutron
+        disable_service q-agt
+        disable_service q-dhcp
+        disable_service q-l3
+        disable_service h-eng
+        disable_service h-api
+        disable_service h-api-cfn
+        disable_service h-api-cw
+
+        DATABASE_PASSWORD=contrail123
+        RABBIT_PASSWORD=contrail123
+        SERVICE_TOKEN=contrail123
+        SERVICE_PASSWORD=contrail123
+        ADMIN_PASSWORD=contrail123
+
+        GLANCE_BRANCH=stable/juno
+        HORIZON_BRANCH=stable/juno
+        KEYSTONE_BRANCH=stable/juno
+        NOVA_BRANCH=stable/juno
+        NEUTRON_BRANCH=stable/juno
+        HEAT_BRANCH=stable/juno
+        CINDER_BRANCH=stable/juno
+        TROVE_BRANCH=stable/juno
+        SWIFT_BRANCH=2.3.0
+
+        Q_PLUGIN=opencontrail
+        Q_PLUGIN_CLASS=neutron_plugin_contrail.plugins.opencontrail.contrail_plugin_v3.NeutronPluginContrailCoreV3
+
+        HOST_IP_IFACE=vhost0
+        IP_VERSION=4
+
+        # proto for openstack bits. Use HTTPS if git is firewalled
+        GIT_BASE=https://git.openstack.org
+
+        # opencontrail nova plugin
+        NOVA_VIF_DRIVER=nova_contrail_vif.contrailvif.VRouterVIFDriver
+
+        [[post-config|$NOVA_CONF]]
+        [DEFAULT]
+        network_api_class = nova_contrail_vif.contrailvif.ContrailNetworkAPI
+        [libvirt]
+        virt_type = qemu
+        
+        [[post-config|$NEUTRON_CONF]]
+        [DEFAULT]
+        api_extensions_path = /opt/stack/contrail/openstack/neutron_plugin/neutron_plugin_contrail/extensions
+        service_plugins = neutron_plugin_contrail.plugins.opencontrail.loadbalancer.plugin.LoadBalancerPlugin
+        quota_driver =
+
+
+    path: /opt/openstack_local.conf
+    permissions: 0664
