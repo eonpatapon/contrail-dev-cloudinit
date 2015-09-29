@@ -31,6 +31,7 @@ final_message: "!!! Starting building OpenContrail !!! (cloudinit runs in $UPTIM
 output: {all: '| tee -a /var/log/cloud-init-output.log'}
 
 runcmd:
+  - [ sh, -xc, "cp /etc/network/interfaces.d/eth0.cfg /etc/network/interfaces.d/eth1.cfg && sed -i 's/eth0/eth1/g' /etc/network/interfaces.d/eth1.cfg && ifup eth1"]
   - [ sh, -xc, "su cloud -c 'cd && git clone https://github.com/nojhan/liquidprompt.git'" ]
   - [ sh, -xc, "su cloud -c 'echo source ~/liquidprompt/liquidprompt >> /home/cloud/.bashrc'" ]
   - [ sh, -xc, "su cloud -c 'git config --global http.sslVerify false'"]
