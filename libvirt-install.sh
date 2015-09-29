@@ -18,3 +18,6 @@ cp $DIR/images/trusty-server-cloudimg-amd64-disk1.img $DISK_PATH
 qemu-img resize $DISK_PATH +30GB
 
 virt-install --connect qemu:///system --import -n $2 -r 4096 -w network=default -w network=overlay,model=virtio -w network=adm,model=virtio --disk path=$DISK_PATH --disk path=$ISO_PATH,device=cdrom --noautoconsole
+virsh -c  qemu:///system net-info default || virsh -c  qemu:///system net-create conf/libvirt-net-default.xml
+virsh -c  qemu:///system net-info overlay || virsh -c  qemu:///system net-create conf/libvirt-net-overlay.xml
+virsh -c  qemu:///system net-info adm || virsh -c  qemu:///system net-create conf/libvirt-net-adm.xml
