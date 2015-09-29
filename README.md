@@ -3,8 +3,11 @@ A set of flies/scripts to run a devstack+contrail against a local machine (libvi
 Local libvirt
 =============
 
-Create two private networks "overlay" and "adm".
 The script will use the `.ssh/id_rsa.pub` key in the cloudinit configuration.
+
+The script will create automatically the networks "overlay" (192.168.123.0/24),
+"adm" (192.168.124.0/24) and "default (192.168.122.0/24 - nat mode)" if they
+don't exists.
 
 Run `./libvirt-install.sh devstack-contrail-juno.yml <VM_NAME>`
 
