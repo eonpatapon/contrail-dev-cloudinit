@@ -156,6 +156,7 @@ write_files:
         [DEFAULT]
         api_extensions_path = /opt/stack/contrail/openstack/neutron_plugin/neutron_plugin_contrail/extensions
         service_plugins = neutron_plugin_contrail.plugins.opencontrail.loadbalancer.plugin.LoadBalancerPlugin
+        [quotas]
         quota_driver =
 
 
