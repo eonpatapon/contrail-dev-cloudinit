@@ -24,3 +24,16 @@ virsh -c  qemu:///system net-info overlay || virsh -c  qemu:///system net-create
 virsh -c  qemu:///system net-info adm || virsh -c  qemu:///system net-create conf/libvirt-net-adm.xml
 
 virt-install --connect qemu:///system --import -n $2 -r 4096 -w network=adm,model=virtio -w network=overlay,model=virtio -w network=default --disk path=$DISK_PATH --disk path=$ISO_PATH,device=cdrom --noautoconsole
+
+MAC_ADM=$(virsh -c qemu:///system dumpxml $2 | grep 'mac address' | head -n1 | cut -d"'" -f2)
+
+echo Waiting to get the VM IP address...
+while true
+do
+    IP_ADM=$(arp -en | grep $MAC_ADM | awk '{ print $1 }')
+    test ! -z $IP_ADM && break
+    sleep 1
+done
+
+echo VM admin IP is $IP_ADM
+echo ssh cloud@$IP_ADM
