@@ -23,7 +23,6 @@ packages:
   - mosh
   - tmux
   - screen
-  - python-kafka-python # contrail analytics
   - libpq-dev  # rally
 
 final_message: "!!! Starting building OpenContrail !!! (cloudinit runs in $UPTIME seconds)"
