@@ -10,6 +10,8 @@ test -d $DIR/vms || mkdir $DIR/vms
 ISO_PATH=$DIR/vms/${2}-config.iso
 DISK_PATH=$DIR/vms/${2}.img
 
+test -f $DISK_PATH && echo "A VM disk already exists at $DISK_PATH. Aborting." && exit 1
+
 $DIR/build-nocloud-metadata.sh ${1} ${2} $ISO_PATH
 
 test -f $DIR/images/trusty-server-cloudimg-amd64-disk1.img || wget https://cloud-images.ubuntu.com/trusty/current/trusty-server-cloudimg-amd64-disk1.img -O $DIR/images/trusty-server-cloudimg-amd64-disk1.img
@@ -21,4 +23,4 @@ virsh -c  qemu:///system net-info default || virsh -c  qemu:///system net-create
 virsh -c  qemu:///system net-info overlay || virsh -c  qemu:///system net-create conf/libvirt-net-overlay.xml
 virsh -c  qemu:///system net-info adm || virsh -c  qemu:///system net-create conf/libvirt-net-adm.xml
 
-virsh -c  qemu:///system dominfo ${2} || virt-install --connect qemu:///system --import -n $2 -r 4096 -w network=adm,model=virtio -w network=overlay,model=virtio -w network=default --disk path=$DISK_PATH --disk path=$ISO_PATH,device=cdrom --noautoconsole
+virt-install --connect qemu:///system --import -n $2 -r 4096 -w network=adm,model=virtio -w network=overlay,model=virtio -w network=default --disk path=$DISK_PATH --disk path=$ISO_PATH,device=cdrom --noautoconsole
