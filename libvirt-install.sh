@@ -10,6 +10,7 @@ test -d $DIR/vms || mkdir $DIR/vms
 ISO_PATH=$DIR/vms/${2}-config.iso
 DISK_PATH=$DIR/vms/${2}.img
 
+virsh -c qemu:///system dumpxml $2 &>/dev/null && echo "The VM ${2} disk already exists. Aborting." && exit 1
 test -f $ISO_PATH && echo "An iso disk already exists at $ISO_PATH. Aborting." && exit 1
 test -f $DISK_PATH && echo "A VM disk already exists at $DISK_PATH. Aborting." && exit 1
 
