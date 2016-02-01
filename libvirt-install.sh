@@ -10,6 +10,7 @@ test -d $DIR/vms || mkdir $DIR/vms
 ISO_PATH=$DIR/vms/${2}-config.iso
 DISK_PATH=$DIR/vms/${2}.img
 
+test -f $ISO_PATH && echo "An iso disk already exists at $ISO_PATH. Aborting." && exit 1
 test -f $DISK_PATH && echo "A VM disk already exists at $DISK_PATH. Aborting." && exit 1
 
 $DIR/build-nocloud-metadata.sh ${1} ${2} $ISO_PATH
