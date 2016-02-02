@@ -45,7 +45,7 @@ write_files:
         tmux new-window -t opencontrail:1 -n contrail
         tmux new-window -t opencontrail:2 -n stack
 
-        tmux send-keys -t opencontrail:1 'cd ~/ && git clone https://github.com/Juniper/contrail-installer.git && cd ~/contrail-installer/ && cp /opt/opencontrail_localrc localrc && ./contrail.sh build && ./contrail.sh install && ./contrail.sh configure && sudo pip install "greenlet>=0.4.7" && ./contrail.sh start && tmux send-keys -t opencontrail:2 "cd ~/ && git clone https://github.com/openstack-dev/devstack.git -b stable/juno && cd ~/devstack && cp /opt/openstack_local.conf local.conf && cp ~/contrail-installer/devstack/lib/neutron_plugins/opencontrail lib/neutron_plugins/opencontrail && ./stack.sh" C-m' C-m
+        tmux send-keys -t opencontrail:1 'cd ~/ && git clone https://github.com/Juniper/contrail-installer.git && cd ~/contrail-installer/ && cp /opt/opencontrail_localrc localrc && ./contrail.sh build && ./contrail.sh install && ./contrail.sh configure && sudo pip install "greenlet>=0.4.7" && ./contrail.sh start && tmux send-keys -t opencontrail:2 "cd ~/ && git clone https://github.com/openstack-dev/devstack.git -b juno-eol && cd ~/devstack && cp /opt/openstack_local.conf local.conf && cp ~/contrail-installer/devstack/lib/neutron_plugins/opencontrail lib/neutron_plugins/opencontrail && ./stack.sh" C-m' C-m
 
         tmux select-window -t opencontrail:0
     path: /opt/opencontrail_run.sh
@@ -124,14 +124,15 @@ write_files:
         SERVICE_PASSWORD=contrail123
         ADMIN_PASSWORD=contrail123
 
-        GLANCE_BRANCH=stable/juno
-        HORIZON_BRANCH=stable/juno
-        KEYSTONE_BRANCH=stable/juno
-        NOVA_BRANCH=stable/juno
-        NEUTRON_BRANCH=stable/juno
-        HEAT_BRANCH=stable/juno
-        CINDER_BRANCH=stable/juno
-        TROVE_BRANCH=stable/juno
+        GLANCE_BRANCH=juno-eol
+        HORIZON_BRANCH=juno-eol
+        KEYSTONE_BRANCH=juno-eol
+        NOVA_BRANCH=juno-eol
+        NEUTRON_BRANCH=juno-eol
+        HEAT_BRANCH=juno-eol
+        CINDER_BRANCH=juno-eol
+        TROVE_BRANCH=juno-eol
+	REQUIREMENTS_BRANCH=juno-eol
         SWIFT_BRANCH=2.3.0
 
         Q_PLUGIN=opencontrail
