@@ -132,7 +132,7 @@ write_files:
         HEAT_BRANCH=juno-eol
         CINDER_BRANCH=juno-eol
         TROVE_BRANCH=juno-eol
-	REQUIREMENTS_BRANCH=juno-eol
+        REQUIREMENTS_BRANCH=juno-eol
         SWIFT_BRANCH=2.3.0
 
         Q_PLUGIN=opencontrail
