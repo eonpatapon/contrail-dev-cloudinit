@@ -14,7 +14,7 @@ function get_fip() {
     found=false
     for line in $(neutron floatingip-list -f csv | tail -n+2); do
         uuid=`echo $line | cut -d',' -f1 | sed 's/"//g'`;
-        [ "$(echo $list | cut -d',' -f2)" == "" ] && echo $uuid && found=true && break;
+        [ "$(echo $line | cut -d',' -f2 | sed 's/"//g')" == "" ] && echo $uuid && found=true && break;
     done
     [ "$found" == false ] && echo $(neutron floatingip-create $NET_PUBLIC | grep " id " | awk '{print $4}')
 }
