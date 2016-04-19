@@ -1,0 +1,81 @@
+#cloud-config
+# vim: syntax=yaml
+
+user: cloud
+ssh_pwauth: True
+chpasswd:
+    list: |
+        root:contrail123
+        cloud:contrail123
+    expire: False
+
+package_update: true
+package_upgrade: true
+package_reboot_if_required: false
+
+packages:
+  - git
+  - subversion
+  - mc
+  - vim
+  - traceroute
+  - htop
+  - mosh
+  - tmux
+  - screen
+  - jq
+  - libpq-dev  # rally
+
+final_message: "!!! Starting building OpenContrail !!! (cloudinit runs in $UPTIME seconds)"
+
+output: {all: '| tee -a /var/log/cloud-init-output.log'}
+
+runcmd:
+  - [ sh, -xc, "su cloud -c 'cd && git clone https://github.com/nojhan/liquidprompt.git'" ]
+  - [ sh, -xc, "su cloud -c 'echo source ~/liquidprompt/liquidprompt >> /home/cloud/.bashrc'" ]
+  - [ sh, -xc, "su cloud -c 'git config --global http.sslVerify false'"]
+  - [ sh, -xc, "su cloud -c 'bash /opt/build.sh'" ]
+
+write_files:
+-   content: |
+        #!/usr/bin/env bash
+        tmux new-session -s opencontrail -n shell -d
+        tmux new-window -t opencontrail:1 -n stack
+        tmux send-keys -t opencontrail:1 'cd ~/ && git clone https://github.com/eonpatapon/devstack.git && cd devstack && git checkout stable/liberty && cp /opt/local.conf . && ./stack.sh' C-m
+    path: /opt/build.sh
+    permissions: 0775
+-   content: |
+        [[local|localrc]]
+        SERVICE_TOKEN=azertytoken
+        ADMIN_PASSWORD=contrail123
+        MYSQL_PASSWORD=stackdb
+        RABBIT_PASSWORD=stackqueue
+        SERVICE_PASSWORD=$ADMIN_PASSWORD
+        LOGFILE=$DEST/logs/stack.sh.log
+        LOGDAYS=2
+        SWIFT_HASH=66a3d6b56c1f479c8b4e70ab5c2000f5
+        SWIFT_REPLICAS=1
+        SWIFT_DATA_DIR=$DEST/data
+
+        enable_service tempest
+
+        enable_plugin contrail https://github.com/eonpatapon/contrail-devstack-plugin.git
+        #enable_plugin neutron-lbaas https://github.com/openstack/neutron-lbaas.git
+
+        SCONS_JOBS=$(lscpu -p | grep -cve '^#')
+
+        #Q_PLUGIN_CLASS=neutron_plugin_contrail.plugins.opencontrail.contrail_plugin.NeutronPluginContrailCore
+
+        [[post-config|$NEUTRON_CONF]]
+        [DEFAULT]
+        #service_plugins = neutron_plugin_contrail.plugins.opencontrail.loadbalancer.plugin.LoadBalancerPlugin
+        [quotas]
+        quota_driver = neutron_plugin_contrail.plugins.opencontrail.quota.driver.QuotaDriver
+
+        [[post-config|$NOVA_CONF]]
+        [libvirt]
+        vif_driver = nova_contrail_vif.contrailvif.VRouterVIFDriver
+        virt_type = qemu
+
+    path: /opt/local.conf
+    permissions: 0664
