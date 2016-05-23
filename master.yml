@@ -59,7 +59,7 @@ write_files:
 
         enable_service tempest
 
-        enable_plugin contrail https://github.com/eonpatapon/contrail-devstack-plugin.git
+        enable_plugin contrail https://github.com/zioc/contrail-devstack-plugin.git
         #enable_plugin neutron-lbaas https://github.com/openstack/neutron-lbaas.git
 
         SCONS_JOBS=$(lscpu -p | grep -cve '^#')
