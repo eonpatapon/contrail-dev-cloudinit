@@ -57,7 +57,7 @@ write_files:
         SWIFT_REPLICAS=1
         SWIFT_DATA_DIR=$DEST/data
 
-        enable_service tempest
+        #enable_service tempest
 
         enable_plugin contrail https://github.com/zioc/contrail-devstack-plugin.git
         #enable_plugin neutron-lbaas https://github.com/openstack/neutron-lbaas.git
