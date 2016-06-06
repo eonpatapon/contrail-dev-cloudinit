@@ -25,7 +25,7 @@ virsh -c  qemu:///system net-info default || virsh -c  qemu:///system net-create
 virsh -c  qemu:///system net-info overlay || virsh -c  qemu:///system net-create conf/libvirt-net-overlay.xml
 virsh -c  qemu:///system net-info adm || virsh -c  qemu:///system net-create conf/libvirt-net-adm.xml
 
-virt-install --connect qemu:///system --import -n $2 -r 4096 -w network=adm,model=virtio -w network=overlay,model=virtio -w network=default --disk path=$DISK_PATH --disk path=$ISO_PATH,device=cdrom --noautoconsole
+virt-install --connect qemu:///system --import -n $2 -r 4096 -w network=adm,model=virtio -w network=overlay,model=virtio -w network=default --disk path=$DISK_PATH,format=qcow2 --disk path=$ISO_PATH,device=cdrom --noautoconsole
 
 MAC_ADM=$(virsh -c qemu:///system dumpxml $2 | grep 'mac address' | head -n1 | cut -d"'" -f2)
 
