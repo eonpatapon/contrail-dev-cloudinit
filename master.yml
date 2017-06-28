@@ -57,7 +57,7 @@ write_files:
         SWIFT_REPLICAS=1
         SWIFT_DATA_DIR=$DEST/data
 
-        enable_service tempest
+        #enable_service tempest
 
         enable_plugin contrail https://github.com/zioc/contrail-devstack-plugin.git
         #enable_plugin neutron-lbaas https://github.com/openstack/neutron-lbaas.git
@@ -74,7 +74,7 @@ write_files:
 
         [[post-config|$NOVA_CONF]]
         [libvirt]
-        vif_driver = nova_contrail_vif.contrailvif.VRouterVIFDriver
+        #vif_driver = nova_contrail_vif.contrailvif.VRouterVIFDriver
         virt_type = qemu
 
     path: /opt/local.conf

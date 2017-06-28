@@ -25,6 +25,10 @@ packages:
   - screen
   - jq
   - libpq-dev  # rally
+  - liberasurecode-dev # PyECLib
+
+apt_sources:
+  - source: deb http://archive.ubuntu.com/ubuntu trusty-backports universe
 
 final_message: "!!! Starting building OpenContrail !!! (cloudinit runs in $UPTIME seconds)"
 
@@ -41,7 +45,7 @@ write_files:
         #!/usr/bin/env bash
         tmux new-session -s opencontrail -n shell -d
         tmux new-window -t opencontrail:1 -n stack
-        tmux send-keys -t opencontrail:1 'cd ~/ && git clone https://github.com/eonpatapon/devstack.git && cd devstack && git checkout stable/liberty && cp /opt/local.conf . && (./stack.sh || ./stack.sh)' C-m
+        tmux send-keys -t opencontrail:1 'cd ~/ && git clone https://github.com/openstack-dev/devstack.git && cd devstack && git checkout stable/mitaka && cp /opt/local.conf . && (./stack.sh || ./stack.sh)' C-m
     path: /opt/build.sh
     permissions: 0775
 -   content: |
@@ -59,14 +63,38 @@ write_files:
         HOST_IP=127.0.0.1
 
         enable_plugin contrail https://github.com/zioc/contrail-devstack-plugin.git
+        enable_plugin rally https://github.com/openstack/rally master
+        enable_plugin skydive https://github.com/skydive-project/skydive.git
         #enable_plugin neutron-lbaas https://github.com/openstack/neutron-lbaas.git
 
+        REQUIREMENTS_REPO="https://github.com/rasta-rocket/requirements.git"
+        REQUIREMENTS_BRANCH="cloudwatt-stable/mitaka"
+
         CONTRAIL_REPO=https://github.com/eonpatapon/contrail-vnc.git
-        CONTRAIL_BRANCH=R2.21-cloudwatt
+        CONTRAIL_BRANCH=R3.2-cloudwatt
         SCONS_JOBS=$(lscpu -p | grep -cve '^#')
         VHOST_INTERFACE_NAME=eth0
-        
-        enable_service vrouter api-srv disco svc-mon schema control collector analytics-api query-engine
+        Q_L3_ENABLED=True
+        VGW_MASQUERADE=True
+
+        SKYDIVE_ANALYZER_LISTEN=0.0.0.0:8282
+        SKYDIVE_ANALYZERS=${HOST_IP}:8282
+        SKYDIVE_AGENT_LISTEN=${HOST_IP}:8181
+        SKYDIVE_AGENT_ETCD=${HOST_IP}:2379
+        SKYDIVE_AGENT_PROBES="netns netlink opencontrail neutron"
+
+        # base
+        ENABLED_SERVICES=rabbit,mysql,key
+        # nova
+        ENABLED_SERVICES+=,n-api,n-crt,n-obj,n-cpu,n-cond,n-sch
+        # neutron
+        ENABLED_SERVICES+=,q-svc,q-agt,q-meta,neutron
+        # glance
+        ENABLED_SERVICES+=,g-api,g-reg
+        # contrail
+        ENABLED_SERVICES+=,vrouter,api-srv,disco,svc-mon,schema,control,collector,analytic-api,query-engine
+        # skydive
+        ENABLED_SERVICES+=,skydive-agent,skydive-analyzer
 
         #Q_PLUGIN_CLASS=neutron_plugin_contrail.plugins.opencontrail.contrail_plugin.NeutronPluginContrailCore
 
@@ -76,10 +104,10 @@ write_files:
         [quotas]
         quota_driver = neutron_plugin_contrail.plugins.opencontrail.quota.driver.QuotaDriver
 
-        [[post-config|$NOVA_CONF]]
-        [libvirt]
-        vif_driver = nova_contrail_vif.contrailvif.VRouterVIFDriver
-        virt_type = qemu
+        #[[post-config|$NOVA_CONF]]
+        #[libvirt]
+        #vif_driver = nova_contrail_vif.contrailvif.VRouterVIFDriver
+        #virt_type = qemu
 
     path: /opt/local.conf
     permissions: 0664

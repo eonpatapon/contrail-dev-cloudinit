@@ -26,8 +26,6 @@ packages:
   - jq
   - libpq-dev  # rally
 
-final_message: "!!! Starting building OpenContrail !!! (cloudinit runs in $UPTIME seconds)"
-
 output: {all: '| tee -a /var/log/cloud-init-output.log'}
 
 runcmd:
@@ -41,7 +39,7 @@ write_files:
         #!/usr/bin/env bash
         tmux new-session -s opencontrail -n shell -d
         tmux new-window -t opencontrail:1 -n stack
-        tmux send-keys -t opencontrail:1 'cd ~/ && git clone https://github.com/eonpatapon/devstack.git && cd devstack && git checkout stable/liberty && cp /opt/local.conf . && ./stack.sh' C-m
+        tmux send-keys -t opencontrail:1 'cd ~/ && git clone https://github.com/openstack-dev/devstack.git && cd devstack && git checkout stable/mitaka && cp /opt/local.conf . && ./stack.sh' C-m
     path: /opt/build.sh
     permissions: 0775
 -   content: |
@@ -64,25 +62,19 @@ write_files:
         enable_service q-meta
         enable_service tempest
 
-        #enable_plugin contrail https://github.com/zioc/contrail-devstack-plugin.git
-        #enable_plugin neutron-lbaas https://github.com/openstack/neutron-lbaas.git
+        ## Neutron options
+        Q_USE_SECGROUP=True
+        FLOATING_RANGE="172.18.161.0/24"
+        FIXED_RANGE="10.0.0.0/24"
+        Q_FLOATING_ALLOCATION_POOL=start=172.18.161.2,end=172.18.161.254
+        PUBLIC_NETWORK_GATEWAY="172.18.161.1"
+        PUBLIC_INTERFACE=eth0
 
-        #CONTRAIL_REPO=https://github.com/eonpatapon/contrail-vnc.git
-        #CONTRAIL_BRANCH=R2.21-cloudwatt
-        #SCONS_JOBS=$(lscpu -p | grep -cve '^#')
-
-        #Q_PLUGIN_CLASS=neutron_plugin_contrail.plugins.opencontrail.contrail_plugin.NeutronPluginContrailCore
-
-        #[[post-config|$NEUTRON_CONF]]
-        #[DEFAULT]
-        #service_plugins = neutron_plugin_contrail.plugins.opencontrail.loadbalancer.plugin.LoadBalancerPlugin
-        #[quotas]
-        #quota_driver = neutron_plugin_contrail.plugins.opencontrail.quota.driver.QuotaDriver
-
-        #[[post-config|$NOVA_CONF]]
-        #[libvirt]
-        #vif_driver = nova_contrail_vif.contrailvif.VRouterVIFDriver
-        #virt_type = qemu
+        # Open vSwitch provider networking configuration
+        Q_USE_PROVIDERNET_FOR_PUBLIC=True
+        OVS_PHYSICAL_BRIDGE=br-ex
+        PUBLIC_BRIDGE=br-ex
+        OVS_BRIDGE_MAPPINGS=public:br-ex
 
     path: /opt/local.conf
     permissions: 0664
