@@ -45,7 +45,7 @@ write_files:
         #!/usr/bin/env bash
         tmux new-session -s opencontrail -n shell -d
         tmux new-window -t opencontrail:1 -n stack
-        tmux send-keys -t opencontrail:1 'cd ~/ && git clone https://github.com/openstack-dev/devstack.git && cd devstack && git checkout stable/mitaka && cp /opt/local.conf . && (./stack.sh || ./stack.sh)' C-m
+        tmux send-keys -t opencontrail:1 'cd ~/ && git clone https://github.com/openstack-dev/devstack.git && cd devstack && git checkout mitaka-eol && cp /opt/local.conf . && (./stack.sh || ./stack.sh)' C-m
     path: /opt/build.sh
     permissions: 0775
 -   content: |
@@ -65,10 +65,22 @@ write_files:
         enable_plugin contrail https://github.com/zioc/contrail-devstack-plugin.git
         enable_plugin rally https://github.com/openstack/rally master
         enable_plugin skydive https://github.com/skydive-project/skydive.git
+        enable_plugin contrail-ci https://github.com/eonpatapon/contrail-ci.git
         #enable_plugin neutron-lbaas https://github.com/openstack/neutron-lbaas.git
 
         REQUIREMENTS_REPO="https://github.com/rasta-rocket/requirements.git"
         REQUIREMENTS_BRANCH="cloudwatt-stable/mitaka"
+
+        CINDER_BRANCH=${CINDER_BRANCH:-mitaka-eol}
+        GLANCE_BRANCH=${GLANCE_BRANCH:-mitaka-eol}
+        HEAT_BRANCH=${HEAT_BRANCH:-mitaka-eol}
+        HORIZON_BRANCH=${HORIZON_BRANCH:-mitaka-eol}
+        KEYSTONE_BRANCH=${KEYSTONE_BRANCH:-mitaka-eol}
+        NEUTRON_BRANCH=${NEUTRON_BRANCH:-mitaka-eol}
+        NEUTRON_FWAAS_BRANCH=${NEUTRON_FWAAS_BRANCH:-mitaka-eol}
+        NEUTRON_LBAAS_BRANCH=${NEUTRON_LBAAS_BRANCH:-mitaka-eol}
+        NOVA_BRANCH=${NOVA_BRANCH:-mitaka-eol}
+        SWIFT_BRANCH=${SWIFT_BRANCH:-mitaka-eol}
 
         CONTRAIL_REPO=https://github.com/eonpatapon/contrail-vnc.git
         CONTRAIL_BRANCH=R3.2-cloudwatt
@@ -77,11 +89,16 @@ write_files:
         Q_L3_ENABLED=True
         VGW_MASQUERADE=True
 
+        PUBLIC_INTERFACE=$VHOST_INTERFACE_NAME
+
         SKYDIVE_ANALYZER_LISTEN=0.0.0.0:8282
         SKYDIVE_ANALYZERS=${HOST_IP}:8282
-        SKYDIVE_AGENT_LISTEN=${HOST_IP}:8181
+        SKYDIVE_AGENT_LISTEN=${HOST_IP}:8281
         SKYDIVE_AGENT_ETCD=${HOST_IP}:2379
         SKYDIVE_AGENT_PROBES="netns netlink opencontrail neutron"
+        SKYDIVE_FLOWS_STORAGE="none"
+        SKYDIVE_GRAPH_STORAGE="memory"
+        SKYDIVE_KEYSTONE_API_VERSION="v2.0"
 
         # base
         ENABLED_SERVICES=rabbit,mysql,key
