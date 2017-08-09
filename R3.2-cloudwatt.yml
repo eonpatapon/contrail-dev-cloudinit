@@ -66,7 +66,7 @@ write_files:
         enable_plugin rally https://github.com/openstack/rally master
         enable_plugin skydive https://github.com/skydive-project/skydive.git
         enable_plugin contrail-ci https://github.com/eonpatapon/contrail-ci.git
-        #enable_plugin neutron-lbaas https://github.com/openstack/neutron-lbaas.git
+        enable_plugin neutron-lbaas https://github.com/openstack/neutron-lbaas.git mitaka-eol
 
         REQUIREMENTS_REPO="https://github.com/rasta-rocket/requirements.git"
         REQUIREMENTS_BRANCH="cloudwatt-stable/mitaka"
@@ -112,19 +112,17 @@ write_files:
         ENABLED_SERVICES+=,vrouter,api-srv,disco,svc-mon,schema,control,collector,analytic-api,query-engine
         # skydive
         ENABLED_SERVICES+=,skydive-agent,skydive-analyzer
-
-        #Q_PLUGIN_CLASS=neutron_plugin_contrail.plugins.opencontrail.contrail_plugin.NeutronPluginContrailCore
+        # lbaas
+        ENABLED_SERVICES+=,q-lbaasv1
 
         [[post-config|$NEUTRON_CONF]]
         [DEFAULT]
-        #service_plugins = neutron_plugin_contrail.plugins.opencontrail.loadbalancer.plugin.LoadBalancerPlugin
+        api_extensions_path = extensions:/opt/stack/contrail/openstack/neutron_plugin/neutron_plugin_contrail/extensions:/opt/stack/neutron-lbaas/neutron_lbaas/extensions
+        service_plugins = neutron_plugin_contrail.plugins.opencontrail.loadbalancer.plugin.LoadBalancerPlugin
+        [service_providers]
+        service_provider = LOADBALANCER:opencontrail:neutron_plugin_contrail.plugins.opencontrail.loadbalancer.driver.OpencontrailLoadbalancerDriver:default
         [quotas]
         quota_driver = neutron_plugin_contrail.plugins.opencontrail.quota.driver.QuotaDriver
-
-        #[[post-config|$NOVA_CONF]]
-        #[libvirt]
-        #vif_driver = nova_contrail_vif.contrailvif.VRouterVIFDriver
-        #virt_type = qemu
 
     path: /opt/local.conf
     permissions: 0664
