@@ -83,7 +83,7 @@ write_files:
         SWIFT_BRANCH=${SWIFT_BRANCH:-mitaka-eol}
 
         CONTRAIL_REPO=https://github.com/eonpatapon/contrail-vnc.git
-        CONTRAIL_BRANCH=R3.2-cloudwatt
+        CONTRAIL_BRANCH=devstack
         SCONS_JOBS=$(lscpu -p | grep -cve '^#')
         VHOST_INTERFACE_NAME=eth0
         Q_L3_ENABLED=True
